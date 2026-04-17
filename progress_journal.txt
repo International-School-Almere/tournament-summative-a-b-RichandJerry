@@ -1,4 +1,1 @@
-players = []
-events = []
-score = []
-def 
+
