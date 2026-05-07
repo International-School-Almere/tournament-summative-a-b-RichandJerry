@@ -1,1 +1,13 @@
+1. About this Project
+This project is desktop app using Python code and TKinter.
+TKinter can make GUI app, in other words, if you use TKinter it will be not only program that typing the text to a brack screen. It can allow to have button and input box and windows.
+Purpose of this code is managing the taunament and it shuld allow to add players, choose type(individual, team),edit and delate player.Also  allow to make a new event, allow to connect players to event, allow to input position, allow to set a connection of position and point, allow to show result of ranking and shold calculate automatically, also allow to save the data with JSON.
 
+2. First Idea
+First of all, I made code from GUI because by creating the screen first,i can understand what bottun i need, what input bottun i need, what screen i need 
+And If I make prosess of code first, it will be easy to confuse but If i make GUI first I can think when i click the bottun what it should work or what does it need.
+Also easy to organize the code for example player screen, event screen, risul screen.
+My first Idea was only add player and add event and add score and result but when i am making this code I think i do not have enough functions so I added select event and add position for more real system.
+
+3. prosess of development
+Make basic GUI
