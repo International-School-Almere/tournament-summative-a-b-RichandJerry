@@ -2,10 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 import json
 
-root = tk.Tk()
-root.title("Tournament Manager")
-root.geometry("900x700")
-
 players = []
 events = []
 positions = []
@@ -34,7 +30,7 @@ def load_data():
 
 def add_player():
     name = player_name_entry.get()
-    p_type = player_type_var.get()
+    p_type = player_type_box.get()
     if name == "":
         return
     player = {"name": name,"type": p_type}
@@ -42,7 +38,7 @@ def add_player():
 
     player_listbox.insert(tk.END, f"{name} ({p_type})")
     player_name_entry.delete(0, tk.END)
-    update_all_optionmenu()
+    update_all_comboboxes()
 
 def delete_player():
     selected = player_listbox.curselection()
@@ -51,11 +47,11 @@ def delete_player():
     index = selected[0]
     del players[index]
     player_listbox.delete(index)
-    update_all_optionmenu()
+    update_all_comboboxes()
 
 selected_player_index = None
 
-def select_player():
+def load_player():
     global selected_player_index
     selected = player_listbox.curselection()
     if not selected:
@@ -72,16 +68,16 @@ def update_player():
     if selected_player_index is None:
         return
     name = player_name_entry.get()
-    p_type = player_type_var.get()
+    p_type = player_type_box.get()
     if name == "":
         return
     players[selected_player_index] = {"name": name,"type": p_type}
     player_listbox.delete(selected_player_index)
     player_listbox.insert(selected_player_index,f"{name} ({p_type})")
     player_name_entry.delete(0, tk.END)
-    player_type_var.set("")
+    player_type_box.current(0)
     selected_player_index = None
-    update_all_optionmenu()
+    update_all_comboboxes()
 
 def add_event():
     event_name = event_name_entry.get()
@@ -91,33 +87,21 @@ def add_event():
     events.append(event)
     event_listbox.insert(tk.END, event_name)
     event_name_entry.delete(0, tk.END)
-    update_all_optionmenu()
+    update_all_comboboxes()
 
-def update_all_optionmenu():
+def update_all_comboboxes():
     event_names = []
     for e in events:event_names.append(e["name"])
     player_names = []
     for p in players:player_names.append(p["name"])
-# select_event_box
-    menu = select_event_box["menu"]
-    menu.delete(0, "end")
-    for name in event_names:menu.add_command(label=name,command=lambda value=name:select_event_var.set(value))
-# select_player_box
-    menu = select_player_box["menu"]
-    menu.delete(0, "end")
-    for name in player_names:menu.add_command(label=name,command=lambda value=name:select_player_var.set(value))
-
-    menu = position_event_box["menu"]
-    menu.delete(0, "end")
-    for name in event_names:menu.add_command(label=name,command=lambda value=name:position_event_var.set(value))
-
-    menu = score_event_box["menu"]
-    menu.delete(0, "end")
-    for name in event_names:menu.add_command(label=name,command=lambda value=name:score_event_var.set(value))
+    select_event_box["values"] = event_names
+    position_event_box["values"] = event_names
+    score_event_box["values"] = event_names
+    select_player_box["values"] = player_names
 
 def add_player_to_event():
-    event_name = position_event_var.get()
-    player_name = select_player_var.get()
+    event_name = select_event_box.get()
+    player_name = select_player_box.get()
     if event_name == "" or player_name == "":
         return
     for e in events:
@@ -128,21 +112,21 @@ def add_player_to_event():
 
 def show_event_players(event=None):
     event_players_listbox.delete(0, tk.END)
-    event_name = score_event_var.get()
+    event_name = select_event_box.get()
     for e in events:
         if e["name"] == event_name:
             for p in e["players"]:
                 event_players_listbox.insert(tk.END, p)
 
 def update_position_players(event=None):
-    event_name = score_event_var.get()
+    event_name = position_event_box.get()
     for e in events:
         if e["name"] == event_name:
             position_player_box["values"] = e["players"]
 
 def save_position():
-    event_name = score_event_var.get()
-    player_name = position_player_var.get()
+    event_name = position_event_box.get()
+    player_name = position_player_box.get()
     position = position_entry.get()
     if position == "":
         return
@@ -153,14 +137,14 @@ def save_position():
 
 def show_positions():
     position_listbox.delete(0, tk.END)
-    event_name = position_event_var.get()
+    event_name = position_event_box.get()
     for p in positions:
         if p["event"] == event_name:
             text = f"{p['player']} - {p['position']} place"
             position_listbox.insert(tk.END, text)
 
 def save_score():
-    event_name = score_event_var.get()
+    event_name = score_event_box.get()
     position = score_position_entry.get()
     points = score_points_entry.get()
     if event_name == "":
@@ -198,6 +182,10 @@ def show_results():
             result_text.insert(tk.END, text)
             rank += 1
 
+root = tk.Tk()
+root.title("Tournament Manager")
+root.geometry("900x700")
+
 notebook = ttk.Notebook(root)
 notebook.pack(fill="both", expand=True)
 
@@ -208,13 +196,12 @@ tk.Label(player_tab, text="Player Name").pack()
 player_name_entry = tk.Entry(player_tab)
 player_name_entry.pack(pady=5)
 tk.Label(player_tab, text="Player Type").pack()
-player_type_var = tk.StringVar()
-player_type_var.set("")
-player_type_box = tk.OptionMenu(player_tab, player_type_var, "Individual", "Team")
-player_type_box.pack()
+player_type_box = ttk.Combobox(player_tab, values=["Individual", "Team"], state="readonly")
+player_type_box.pack(pady=5)
+player_type_box.current(0)
 tk.Button(player_tab, text="Add Player", command=add_player).pack(pady=5)
 tk.Button(player_tab, text="Delete Player", command=delete_player).pack(pady=5)
-tk.Button(player_tab, text="Player Select", command=select_player).pack(pady=5)
+tk.Button(player_tab, text="Load Selected", command=load_player).pack(pady=5)
 tk.Button(player_tab, text="Update Player", command=update_player).pack(pady=5)
 tk.Button(player_tab, text="Update Player", command=update_player).pack(pady=5)
 player_listbox = tk.Listbox(player_tab, width=40, height=10)
@@ -232,28 +219,21 @@ event_listbox = tk.Listbox(event_tab, height=10)
 event_listbox.pack(pady=10)
 select_tab = tk.Frame(notebook)
 notebook.add(select_tab, text="Select Event")
-select_event_var = tk.StringVar()
-select_event_box = tk.OptionMenu(select_tab, select_event_var, "", command=show_event_players)
+select_event_box = ttk.Combobox(select_tab, state="readonly")
 select_event_box.pack(pady=5)
-select_event_box = tk.OptionMenu(select_tab, select_event_var,"", command=show_event_players)
-select_player_var = tk.StringVar()
-select_player_var.set("")
-select_player_box = tk.OptionMenu(select_tab, select_player_var, "")
+select_event_box.bind("<<ComboboxSelected>>", show_event_players)
+select_player_box = ttk.Combobox(select_tab, state="readonly")
 select_player_box.pack(pady=5)
 tk.Button(select_tab, text="Add Player To Event", command=add_player_to_event).pack(pady=5)
 event_players_listbox = tk.Listbox(select_tab, height=10)
 event_players_listbox.pack(pady=10)
-# Add position tab system
+# Add position system
 position_tab = tk.Frame(notebook)
 notebook.add(position_tab, text="Add Position")
-position_event_var = tk.StringVar()
-position_event_var.set("")
-position_event_box = tk.OptionMenu(position_tab, position_event_var, "", command=update_position_players)
+position_event_box = ttk.Combobox(position_tab, state="readonly")
 position_event_box.pack(pady=5)
-position_event_box = tk.OptionMenu(position_tab, position_event_var,"",command=update_position_players)
-position_player_var = tk.StringVar()
-position_player_var.set("")
-position_player_box = tk.OptionMenu(position_tab, position_player_var, "")
+position_event_box.bind("<<ComboboxSelected>>", update_position_players)
+position_player_box = ttk.Combobox(position_tab, state="readonly")
 position_player_box.pack(pady=5)
 tk.Label(position_tab, text="Position").pack()
 position_entry = tk.Entry(position_tab)
@@ -263,10 +243,8 @@ position_listbox = tk.Listbox(position_tab, height=10)
 position_listbox.pack(pady=10)
 # add score tab
 score_tab = tk.Frame(notebook)
-notebook.add(score_tab, text="Score Rule of each event")
-score_event_var = tk.StringVar()
-score_event_var.set("")
-score_event_box = tk.OptionMenu(score_tab, score_event_var, "")
+notebook.add(score_tab, text="Add Score")
+score_event_box = ttk.Combobox(score_tab, state="readonly")
 score_event_box.pack(pady=5)
 tk.Label(score_tab, text="Position").pack()
 score_position_entry = tk.Entry(score_tab)
@@ -292,6 +270,6 @@ for p in players:
     player_listbox.insert(tk.END, text)
 for e in events:
     event_listbox.insert(tk.END, e["name"])
-update_all_optionmenu()
+update_all_comboboxes()
 
 root.mainloop()

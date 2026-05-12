@@ -1,5 +1,28 @@
 {
     "players": [],
-    "events": [],
-    "positions": []
+    "events": [
+        {
+            "name": "d",
+            "players": [
+                "a"
+            ],
+            "points": {
+                "1": 19
+            }
+        },
+        {
+            "name": "A",
+            "players": [
+                "Stanley"
+            ],
+            "points": {}
+        }
+    ],
+    "positions": [
+        {
+            "event": "d",
+            "player": "a",
+            "position": 1
+        }
+    ]
 }
